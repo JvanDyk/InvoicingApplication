@@ -1,0 +1,21 @@
+
+andreyev-interview/node_modules/*
+# Build Folders
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+
+# Visual Studio Code
+.vscode/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
