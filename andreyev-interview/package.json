@@ -8,11 +8,26 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vee-validate/zod": "^4.13.2",
+    "@vitejs/plugin-vue": "^5.1.2",
+    "@vueuse/core": "^10.11.0",
+    "axios": "^1.7.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "core-js": "3.37.1",
+    "lucide-vue-next": "^0.424.0",
+    "radix-vue": "^1.9.2",
+    "shadcn-vue": "^0.10.5",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vee-validate": "^4.13.2",
+    "vite": "^5.3.5",
     "vue": "3.4.35",
-    "vue-router": "4.4.2"
+    "vue-router": "4.4.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^22.1.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "@vue/cli-plugin-babel": "^5.0.8",
@@ -22,8 +37,10 @@
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.4.35",
     "@vue/eslint-config-typescript": "^13.0.0",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8.56.0",
     "eslint-plugin-vue": "^9.27.0",
+    "tailwindcss": "^3.4.7",
     "typescript": "5.5.4"
   }
 }

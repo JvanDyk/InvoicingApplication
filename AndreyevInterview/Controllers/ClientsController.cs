@@ -67,7 +67,7 @@ public class ClientsController : ControllerBase
             return NotFound();
         }
 
-        _context.Clients.Remove(client);
+        _context.Remove(client); // remove the client from the context, not create a new one
         await _context.SaveChangesAsync();
 
         return Ok();
