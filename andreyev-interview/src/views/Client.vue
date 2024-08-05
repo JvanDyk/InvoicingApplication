@@ -142,8 +142,6 @@ export default defineComponent({
                 console.log("Some fields are invalid.");
                 return;
             }
-
-            //await createClient();
         });
 
         const deleteClient = async () => {

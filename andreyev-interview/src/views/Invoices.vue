@@ -1,9 +1,9 @@
 <template>
-  <div class="home">
+  <div class="w-screen">
 
     
 
-    <div class="flex flex-col">
+    <div class="flex flex-col" style="width: 50%; margin:auto auto;">
       <div>
         <h1 class="text-2xl">Clients</h1>
         <div class="m-4">
@@ -18,7 +18,7 @@
             <th>Name</th>
             <th>Address</th>
             <th>Email</th>
-            <th>Edit</th>
+            <th>Edit Link</th>
           </thead>
           <tbody>
             <tr v-for="client in state.clients" :key="client.id">
@@ -29,39 +29,41 @@
 
               <td>
                 <router-link :to="{ name: 'GetClient', params: { id: client.id }}">
-                  Edit
+                  Open
                 </router-link>
               </td>
               
             </tr>
           </tbody>
         </table>
-        <div  v-if="state.clients.length == 0">
+        <div class="w-full flex justify-center"  v-if="state.clients.length == 0">
           No clients
         </div>
 
         
       </div>
       
-      <!-- <div class="flex flex-row">
-        <div v-if="state.selectedClientID != 0">Client: </div>
-        <SelectBase class="border border-black border-1">
+
+      <h1 class="text-2xl">Invoices</h1>
+      <div class="flex flex-row">
+        <div class="flex justify-center items-center" >Client: </div>
+        <SelectBase class="border border-black border-1" v-model="state.selectedClientID">
           <SelectTrigger class="w-[180px] ">
             <SelectValue :value="state.selectedClientID.toString()" placeholder="Select a Client" class="flex justify-space-between"/>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Clients</SelectLabel>
-              <SelectItem v-for="client in state.clients" :key="client.id" :value="client.id.toString()" @select="() => { state.selectedClientID = Number(client.id); console.log(state.selectedClientID); }" >
+              <SelectItem v-for="client in state.clients" :key="client.id" :value="client.id.toString()"  > 
                 {{ client.name }} - {{ client.email }} - {{ client.address }}
               </SelectItem>
             </SelectGroup>
           </SelectContent>
         </SelectBase>
-      </div> -->
+      </div>
 
       <div>
-        <form @submit.prevent v-if="state.clients.length != 0">
+        <form  v-if="state.clients.length != 0 && state.selectedClientID != 0" @submit.prevent>
           <LabelBase for="invoices">Create a new invoice</LabelBase>
           <InputBase type="text" name="invoices" v-model="state.description" placeholder="Description" />
           <ButtonBase @click="createInvoice">Create Invoice</ButtonBase>
@@ -82,7 +84,7 @@
               <td>{{invoice.id}}</td>
               <td>{{invoice.description}}</td>
               <td>
-                <router-link :to="{ name: 'Invoice', params: { id: invoice.id }}">
+                <router-link :to="{ name: 'Invoice', params: { id: invoice.id}, query: {clientID: state.selectedClientID.toString()}}">
                   Open
                 </router-link>
               </td>
@@ -101,7 +103,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, reactive, ref, watch } from 'vue';
 import { Button as  ButtonBase} from '@/components/ui/button';
 import { Input as InputBase } from '@/components/ui/input';
 import { Label as LabelBase } from '@/components/ui/label';
@@ -115,35 +117,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Label } from '@/components/ui/label';
 
 export default defineComponent({
   name: 'InvoicesComponent',
   components: {
     LabelBase,
     InputBase,
-    // SelectBase,
-    // SelectContent,
-    // SelectGroup,
-    // SelectItem,
-    // SelectLabel,
-    // SelectTrigger,
-    // SelectValue,
+    SelectBase,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
     ButtonBase,
   },
   setup() {
-    const state = reactive({
-      invoices: [],
-      description: "",
-      clients: [],
-      selectedClientID: 0
-    });
-
-    //const selectedClientID = ref(null);
-
-  // watch(selectedClientID, (newValue: any) => {
-   
-  // });
 
     const getInvoices = async () =>{
       const response = await api.get("/invoices");
@@ -162,23 +151,32 @@ export default defineComponent({
     const createInvoice = async () => {
         const response = await api.put("/invoices",
             JSON.stringify({
+              clientId: state.selectedClientID,
               description: state.description
             })
         );
-        if(response.status == 200) {
-          await getInvoices();
-        }
     }
 
     const isEmpty = (object:any) => object === null || object === undefined || object.length === 0;
     
+    const selectClient = (client: any) => {
+      state.selectedClientID = Number(client.id);
+    };
+
 
     onMounted(() => {
       getClients();
       getInvoices();
     });
 
-    return {state, createInvoice, getClients, getInvoices, isEmpty}
+    const state = reactive({
+      invoices: [],
+      description: "",
+      clients: [],
+      selectedClientID: 0
+    });
+
+    return {state, selectClient,createInvoice, getClients, getInvoices, isEmpty};
   }
 });
 </script>
