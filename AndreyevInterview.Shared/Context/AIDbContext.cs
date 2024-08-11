@@ -14,7 +14,8 @@ public class AIDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Client
-        //modelBuilder.Entity<ClientEntity>().Property(b => b.Address).IsRequired();
+        modelBuilder.Entity<ClientEntity>().Property(b => b.Name).IsRequired();
+        modelBuilder.Entity<ClientEntity>().Property(b => b.Email).IsRequired();
 
         // Invoice
         modelBuilder.Entity<InvoiceEntity>().Property(b => b.Description).IsRequired();

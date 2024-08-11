@@ -4,72 +4,70 @@
 [Route("[controller]")]
 public class ClientsController : ControllerBase
 {
-    private readonly AIDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly IClientService _clientService;
 
-    public ClientsController(AIDbContext context, IMapper mapper)
+    public ClientsController(IClientService clientService)
     {
-        _context = context;
-        _mapper = mapper;
-
+        _clientService = clientService ?? throw new ArgumentNullException(nameof(clientService));
     }
 
+    /// <summary>
+    /// Retrieves all clients.
+    /// </summary>
+    /// <returns>Returns a collection of Clients.</returns>
     [HttpGet]
-    public async Task<ActionResult<ClientDTO>> GetClients()
+    public async Task<ActionResult<List<ClientEntity>>> GetClients()
     {
-        var listOfClients = new List<ClientDTO>();
-        var clients = _context.Clients.ToList();
-
-        foreach (ClientEntity client in clients)
-        {
-            var clientDto = _mapper.Map<ClientDTO>(client);
-            listOfClients.Add(clientDto);
-        }
-
-        return Ok(listOfClients);
+        var clients = await _clientService.GetClientsAsync();
+        return Ok(clients);
     }
 
+    /// <summary>
+    /// Creates a new client.
+    /// </summary>
+    /// <param name="clientEntity">Information about the client to create.</param>
     [HttpPost]
-    public async Task<ActionResult<ClientDTO>> CreateClientAsync(ClientDTO clientDTO)
+    public async Task<ActionResult> CreateClientAsync(ClientEntity clientEntity)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest();
+            return UnprocessableEntity(ModelState);
         }
 
-        var client = _mapper.Map<ClientEntity>(clientDTO);
-
-        await _context.Clients.AddAsync(client);
-        await _context.SaveChangesAsync();
+        await _clientService.CreateClientAsync(clientEntity);
         return Ok();
     }
 
-    [HttpPut]
-    public async Task<IActionResult> UpdateClientAsync(int id, ClientDTO client)
+    /// <summary>
+    /// Updates existent client's record.
+    /// </summary>
+    /// <param name="id">The identifier of the client to update.</param>
+    /// <param name="clientEntity">Contain contains updated client's info.</param>
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateClientAsync(int id, ClientEntity clientEntity)
     {
-        if (id != client.Id)
+        if (id != clientEntity.Id || String.IsNullOrEmpty(id.ToString()))
         {
             return BadRequest();
         }
 
-        _context.Entry(client).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        if (!ModelState.IsValid)
+        {
+            return UnprocessableEntity(ModelState);
+        }
 
+        await _clientService.UpdateClientAsync(clientEntity);
         return Ok();
     }
 
+    /// <summary>
+    /// Deletes a client based on ID.
+    /// </summary>
+    /// <param name="id">The identifier of the client to be deleted.</param>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteClientAsync([FromRoute]int id)
+    public async Task<ActionResult> DeleteClientAsync(int id)
     {
-        var client = await _context.Clients.FindAsync(id);
-        if (client == null)
-        {
-            return NotFound();
-        }
-
-        _context.Remove(client); // remove the client from the context, not create a new one
-        await _context.SaveChangesAsync();
-
+        await _clientService.DeleteClientAsync(id);
         return Ok();
     }
 }

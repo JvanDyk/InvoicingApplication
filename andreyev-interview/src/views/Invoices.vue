@@ -149,7 +149,7 @@ export default defineComponent({
     }
 
     const createInvoice = async () => {
-        const response = await api.put("/invoices",
+        const response = await api.post("/invoices",
             JSON.stringify({
               clientId: state.selectedClientID,
               description: state.description

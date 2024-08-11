@@ -6,10 +6,12 @@ global using System.Threading.Tasks;
 
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Logging;
 
 global using AndreyevInterview.Shared.Entities;
-global using AndreyevInterview.Shared.Models.API;
+global using AndreyevInterview.Shared.Models.Invoices;
 global using AndreyevInterview.Shared.Models;
-global using AndreyevInterview.Shared.Context;
+global using AndreyevInterview.Shared.Services;
+global using AndreyevInterview.Shared.Config;
 
-global using AutoMapper;
+global using AndreyevInterview.Shared.Services.Interfaces;

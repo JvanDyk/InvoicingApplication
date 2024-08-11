@@ -1,4 +1,4 @@
-﻿namespace AndreyevInterview.Shared.Models.API;
+﻿namespace AndreyevInterview.Shared.Models.Invoices;
 
 public class LineItemModel
 {

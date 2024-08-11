@@ -1,23 +1,33 @@
+using AndreyevInterview.Extensions;
+using AndreyevInterview.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace AndreyevInterview;
 
 public class Startup
 {
+    public IConfiguration Configuration { get; }
+
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
     }
 
-    public IConfiguration Configuration { get; }
-
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        // Register Configuration settings
+        services.Configure<AppSettings>(Configuration);
+        services.AddScoped(cfg => cfg.GetService<IOptions<AppSettings>>()!.Value);
+
+        // Register JavaScript Cross Origin Resource Sharing Policy
         services.AddCors(options => options.AddPolicy(
             "CorsPolicy",
             builder => builder
@@ -26,25 +36,22 @@ public class Startup
                 .AllowAnyOrigin())
         );
 
-        //services.AddCors(options =>
-        //{
-        //    options.AddPolicy("CorsPolicy",
-        //                          builder =>
-        //                          {
-        //                              builder.WithOrigins("*");
-        //                          });
-        //});
+        // Register Services
+        services.RegisterServices(Configuration);
 
-        services.AddControllers();
-
+        // Register Controllers and Swagger
+        services.AddControllers().AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+        });
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
-        services.AddAutoMapper(typeof(Startup));
-
-
         // Register DbContext
-        var dbPath = Environment.CurrentDirectory + "andreyev_interview.db";
+        var dbName = Configuration["DatabaseName"];
+        var dbPath = Environment.CurrentDirectory + dbName + ".db";
         services.AddDbContext<AIDbContext>(options =>
             options.UseSqlite(@"Data Source=" + dbPath)
         );
@@ -63,13 +70,18 @@ public class Startup
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "AndreyvInterview");
                 c.RoutePrefix = "swagger";
             });
+
         }
+
+        app.UseMiddleware<ErrorHandlingMiddleware>();
+        app.UseMiddleware<RequestLoggingMiddleware>();
 
         app.UseHttpsRedirection();
 
         app.UseRouting();
 
-        app.UseAuthorization();
+        // Not using Authorization
+        //app.UseAuthorization();
 
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }

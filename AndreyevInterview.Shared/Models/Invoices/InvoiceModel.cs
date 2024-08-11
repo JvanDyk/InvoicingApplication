@@ -1,11 +1,8 @@
-﻿namespace AndreyevInterview.Shared.Models.API;
+﻿namespace AndreyevInterview.Shared.Models.Invoices;
 
 public class InvoiceModel
 {
     public List<Invoices> Invoices { get; set; }
-    //public int Id { get; set; }
-    //public string Description { get; set; }
-    //public decimal TotalBillableValue { get; set; }
 }
 
 public class Invoices

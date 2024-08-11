@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AndreyevInterview.Migrations
+namespace AndreyevInterview.Shared.Migrations
 {
     [DbContext(typeof(AIDbContext))]
-    [Migration("20240803130319_initInvoices")]
-    partial class initInvoices
+    [Migration("20240811204949_InitMigration")]
+    partial class InitMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,7 +27,6 @@ namespace AndreyevInterview.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
