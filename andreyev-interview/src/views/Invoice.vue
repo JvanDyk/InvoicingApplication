@@ -5,6 +5,13 @@
 
         <h2>Invoice Details</h2>
 
+        <div v-if="state.clientName != ''">
+          <H3>Client:</H3>
+          <div>{{ state.clientName }}</div>
+          <div>{{ state.clientEmail }}</div>
+          <div>{{ state.clientAddress }}</div>
+        </div>
+       
         <span>Invoice #{{$route.params.id}}</span>
 
         <h3>Line Items</h3>
@@ -100,7 +107,7 @@
           <TableBody>
             <TableRow v-for="item in state.invoiceHistory" :key="item.message">
               <TableCell>{{new Date(item.createdOn).toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}}</TableCell>
-              <TableCell>{{item.logMessage}}</TableCell>
+              <TableCell>{{item.message}}</TableCell>
             </TableRow>
           </TableBody>
         </TableBase>
@@ -115,7 +122,7 @@ import { Input as InputBase } from "@/components/ui/input";
 import { Table as TableBase, TableHead, TableBody, TableRow, TableCell, TableHeader} from "@/components/ui/table";
 import api from '@/api/invoice-application-api';
 import router from "@/router";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 export default defineComponent({
   name: "InvoiceComponent",
   components: {
@@ -171,7 +178,10 @@ export default defineComponent({
       showDialog: false,
       discount: 0,
       grandTotal: 0,
-      totalBillableValue: 0
+      totalBillableValue: 0,
+      clientName: "",
+      clientEmail: "",
+      clientAddress: ""
     })
 
     const applyCoupon = async () => {
@@ -182,13 +192,13 @@ export default defineComponent({
       );
         
       if(response.status == 200) {
-        fetchLineItems();
+        getLineItems();
+        getInvoiceHistory();
       }
       state.showDialog = false
     }
 
-
-    const fetchLineItems = async () => {
+    const getLineItems = async () => {
       const response = await api.get("/invoices/"+ props.id);
 
       if(response.status == 200) {
@@ -210,7 +220,8 @@ export default defineComponent({
         );
         
         if(response.status == 200) {
-          fetchLineItems();
+          getLineItems();
+          getInvoiceHistory();
         }
     }
 
@@ -218,7 +229,7 @@ export default defineComponent({
         const response = await api.get("/invoices/history/"+ props.id);
         
         if(response.status == 200) {
-          state.invoiceHistory = response.data
+          state.invoiceHistory = response.data.logMessages;
         }
     }
 
@@ -226,7 +237,8 @@ export default defineComponent({
       const response = await api.delete("/invoices/lineItemEntity/"+ id);
         
         if(response.status == 200) {
-          fetchLineItems();
+          getLineItems();
+          getInvoiceHistory();
         }
     }
 
@@ -238,13 +250,33 @@ export default defineComponent({
         }
     }
 
+    const getClient = async (id: string) => {
+        try {
+            const response = await api.get(`/clients/${id}`);
+            if (response.status === 200) {
+                state.clientAddress = response.data.address;
+                state.clientEmail = response.data.email;
+                state.clientName = response.data.name;
+            }
+        } catch (error) {
+            console.error("Error creating client:", error);
+        }
+    }
+    
+    const router = useRouter();
+    const route = useRoute();
 
-    onMounted(() => {
-      fetchLineItems();
-      getInvoiceHistory();
-    })
+    const query = route.query;
+    const clientID = query.clientID;
+    if(clientID) {
+        getClient(clientID as string);
+    }
 
-    return {state, createLineItem, getInvoiceHistory, deleteInvoice, deleteLineItem, applyCoupon}
+    return {state, createLineItem, getInvoiceHistory, deleteInvoice, deleteLineItem, applyCoupon, getLineItems, getClient }
+  },
+  mounted() {
+    this.getLineItems();
+    this.getInvoiceHistory();
   }
 })
 </script>

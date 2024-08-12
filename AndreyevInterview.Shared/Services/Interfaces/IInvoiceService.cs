@@ -20,7 +20,7 @@ public interface IInvoicesService
     /// </summary>
     /// <param name="id">The ID of the invoice.</param>
     /// <returns>The LineItemModel which holds line items for the specified invoice.</returns>
-    LineItemModel GetInvoiceLineItems(int id);
+    Task<LineItemModel> GetInvoiceLineItemsAsync(int id);
 
     /// <summary>
     /// Creates a new invoice.

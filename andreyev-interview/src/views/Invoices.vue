@@ -1,8 +1,5 @@
 <template>
   <div class="w-screen">
-
-    
-
     <div class="flex flex-col" style="width: 50%; margin:auto auto;">
       <div>
         <h1 class="text-2xl">Clients</h1>
@@ -20,7 +17,7 @@
             <th>Email</th>
             <th>Edit Link</th>
           </thead>
-          <tbody>
+          <tbody v-if="!isEmpty(state.clients)">
             <tr v-for="client in state.clients" :key="client.id">
               <td>{{client.id}}</td>
               <td>{{client.name}}</td>
@@ -79,7 +76,7 @@
             <th>Total value</th>
             <th>Total Billed Amount</th>
           </thead>
-          <tbody>
+          <tbody v-if="!isEmpty(state.invoices)">
             <tr v-for="invoice in state.invoices" :key="invoice.id">
               <td>{{invoice.id}}</td>
               <td>{{invoice.description}}</td>
@@ -117,6 +114,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { IClient } from '@/interfaces/IClient';
+import { IInvoice } from '@/interfaces/IInvoices';
+
 
 export default defineComponent({
   name: 'InvoicesComponent',
@@ -133,11 +133,20 @@ export default defineComponent({
     ButtonBase,
   },
   setup() {
+    const state = reactive({
+      invoices: Array<IInvoice>,
+      description: "",
+      clients: Array<IClient>,
+      selectedClientID: 0
+    });
 
     const getInvoices = async () =>{
       const response = await api.get("/invoices");
       if(response.status == 200) {
-        state.invoices = response.data.invoices
+        if(response.data.invoices.length > 0) {
+          state.invoices = response.data.invoices;
+        }
+       
       }
     }
 
@@ -149,12 +158,14 @@ export default defineComponent({
     }
 
     const createInvoice = async () => {
-        const response = await api.post("/invoices",
+        await api.post("/invoices",
             JSON.stringify({
               clientId: state.selectedClientID,
               description: state.description
             })
         );
+
+        getInvoices();
     }
 
     const isEmpty = (object:any) => object === null || object === undefined || object.length === 0;
@@ -163,20 +174,11 @@ export default defineComponent({
       state.selectedClientID = Number(client.id);
     };
 
-
-    onMounted(() => {
-      getClients();
-      getInvoices();
-    });
-
-    const state = reactive({
-      invoices: [],
-      description: "",
-      clients: [],
-      selectedClientID: 0
-    });
-
     return {state, selectClient,createInvoice, getClients, getInvoices, isEmpty};
+  },
+  mounted() {
+    this.getClients();
+    this.getInvoices();
   }
 });
 </script>

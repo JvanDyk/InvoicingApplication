@@ -42,7 +42,10 @@ public class Startup
         // Register Controllers and Swagger
         services.AddControllers().AddNewtonsoftJson(options =>
         {
-            options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            options.SerializerSettings.ContractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
             options.SerializerSettings.Converters.Add(new StringEnumConverter());
             options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
         });

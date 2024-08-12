@@ -13,44 +13,44 @@ public class ClientsControllerTests : IClassFixture<CustomWebApplicationFactory<
         _client = factory.CreateClientWithBaseAddress("http://localhost:5000");
         _dbContext = factory.Services.GetRequiredService<AIDbContext>();
         _dbContext = factory.Services.GetRequiredService<AIDbContext>();
-        Task.Run(async () => await Setup());
+        Setup();
     }
 
-    private async Task Setup()
+    private void Setup()
     {
         if (IsDbSeeded)
         {
             return;
         }
 
-        await _dbContext.Clients.AddAsync(new ClientEntity { Name = "Conrad", Email = "conradvdyk@gmail.com", Address = "14 Retief road, Despatch" });
-        await _dbContext.Clients.AddAsync(new ClientEntity { Name = "Jean", Email = "jean@gmail.com", Address = "15 Retief road, Despatch" });
-        await _dbContext.Clients.AddAsync(new ClientEntity { Name = "Michelle", Email = "michelle@gmail.com", Address = "16 Retief road, Despatch" });
-        await _dbContext.SaveChangesAsync();
+        _dbContext.Clients.Add(new ClientEntity { Name = "Conrad", Email = "conradvdyk@gmail.com", Address = "14 Retief road, Despatch" });
+        _dbContext.Clients.Add(new ClientEntity { Name = "Jean", Email = "jean@gmail.com", Address = "15 Retief road, Despatch" });
+        _dbContext.Clients.Add(new ClientEntity { Name = "Michelle", Email = "michelle@gmail.com", Address = "16 Retief road, Despatch" });
+        _dbContext.SaveChanges();
 
 
         var listOfInvoices = new List<InvoiceEntity>
-            {
-                new InvoiceEntity { ClientId = 1, Discount = 1, Description = "Invoice 1" },
-                new InvoiceEntity { ClientId = 2, Discount = 2, Description = "Invoice 2" },
-                new InvoiceEntity { ClientId = 3, Discount = 3, Description = "Invoice 3" }
-            };
-        await _dbContext.Invoices.AddRangeAsync(listOfInvoices);
-        await _dbContext.SaveChangesAsync();
+        {
+            new InvoiceEntity { ClientId = 1, Discount = 1, Description = "Invoice 1" },
+            new InvoiceEntity { ClientId = 2, Discount = 2, Description = "Invoice 2" },
+            new InvoiceEntity { ClientId = 3, Discount = 3, Description = "Invoice 3" }
+        };
+        _dbContext.Invoices.AddRange(listOfInvoices);
+        _dbContext.SaveChanges();
 
         var listOfLineItems = new List<LineItemEntity>
-            {
-               new LineItemEntity { InvoiceId = 1, Quantity = 1,  Cost = 120.5M, Description = "Item 1", isBillable = true, Invoice = listOfInvoices[0] },
-               new LineItemEntity { InvoiceId = 1, Quantity = 2,  Cost = 210.2M, Description = "Item 2", isBillable = true, Invoice = listOfInvoices[0] },
+        {
+           new LineItemEntity { InvoiceId = 1, Quantity = 1,  Cost = 120.5M, Description = "Item 1", isBillable = true, Invoice = listOfInvoices[0] },
+           new LineItemEntity { InvoiceId = 1, Quantity = 2,  Cost = 210.2M, Description = "Item 2", isBillable = true, Invoice = listOfInvoices[0] },
 
-               new LineItemEntity { InvoiceId = 2, Quantity = 3,  Cost = 300.3M, Description = "Item 3", isBillable = false, Invoice = listOfInvoices[1] },
-               new LineItemEntity { InvoiceId = 2, Quantity = 4,  Cost = 400.4M, Description = "Item 4", isBillable = false, Invoice = listOfInvoices[1] },
+           new LineItemEntity { InvoiceId = 2, Quantity = 3,  Cost = 300.3M, Description = "Item 3", isBillable = false, Invoice = listOfInvoices[1] },
+           new LineItemEntity { InvoiceId = 2, Quantity = 4,  Cost = 400.4M, Description = "Item 4", isBillable = false, Invoice = listOfInvoices[1] },
 
-               new LineItemEntity { InvoiceId = 3, Quantity = 5,  Cost = 500.5M, Description = "Item 5", isBillable = true, Invoice = listOfInvoices[2] },
-               new LineItemEntity { InvoiceId = 3, Quantity = 6,  Cost = 600.6M, Description = "Item 6", isBillable = true, Invoice = listOfInvoices[2] },
-            };
-        await _dbContext.LineItemEntitys.AddRangeAsync(listOfLineItems);
-        await _dbContext.SaveChangesAsync();
+           new LineItemEntity { InvoiceId = 3, Quantity = 5,  Cost = 500.5M, Description = "Item 5", isBillable = true, Invoice = listOfInvoices[2] },
+           new LineItemEntity { InvoiceId = 3, Quantity = 6,  Cost = 600.6M, Description = "Item 6", isBillable = true, Invoice = listOfInvoices[2] },
+        };
+        _dbContext.LineItemEntitys.AddRange(listOfLineItems);
+        _dbContext.SaveChanges();
 
         IsDbSeeded = true;
     }

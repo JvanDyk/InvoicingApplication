@@ -15,6 +15,11 @@ public class ClientService: IClientService
         return listOfClients;
     }
 
+    public async Task<ClientEntity> GetClientAsync(int id)
+    {
+        return await _context.Clients.FindAsync(id);
+    }
+
     public async Task CreateClientAsync(ClientEntity clientEntity)
     {
         await _context.Clients.AddAsync(clientEntity);

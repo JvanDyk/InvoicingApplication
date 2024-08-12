@@ -13,11 +13,13 @@ global using AndreyevInterview.Shared.Entities;
 global using AndreyevInterview.Shared.Context;
 global using AndreyevInterview.Shared.Models;
 global using AndreyevInterview.Tests.Helpers;
+global using AndreyevInterview.Shared.Models.Invoices;
 
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.AspNetCore.Mvc.Testing;
-
+global using Microsoft.EntityFrameworkCore;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
+

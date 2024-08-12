@@ -9,6 +9,12 @@ public interface IClientService
     Task<IEnumerable<ClientEntity>> GetClientsAsync();
 
     /// <summary>
+    /// Gets a client
+    /// </summary>
+    /// <returns>Returns a client.</returns>
+    Task<ClientEntity> GetClientAsync(int id);
+
+    /// <summary>
     /// Creates a client
     /// </summary>
     /// <param name="clientEntity">Client entity to be created</param>

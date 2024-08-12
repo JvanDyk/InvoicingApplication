@@ -30,9 +30,9 @@ public class InvoicesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public ActionResult<LineItemModel> GetInvoiceLineItems(int id)
+    public async Task<ActionResult<LineItemModel>> GetInvoiceLineItems(int id)
     {
-        var result = _invoiceService.GetInvoiceLineItems(id);
+        var result = await _invoiceService.GetInvoiceLineItemsAsync(id);
         return Ok(result);
     }
 
@@ -50,7 +50,7 @@ public class InvoicesController : ControllerBase
         return Ok();
     }
 
-    [HttpPut("discount/{invoiceId}")]
+    [HttpGet("discount/{invoiceId}")]
     public async Task<IActionResult> AddDiscountAsync([FromRoute] int invoiceId, [FromQuery] int discount)
     {
         var result = await _invoiceService.AddDiscountAsync(invoiceId, discount);

@@ -1,6 +1,4 @@
-﻿using AndreyevInterview.Shared.Exceptions;
-
-public class InvoicesService : IInvoicesService
+﻿public class InvoicesService : IInvoicesService
 {
     private readonly AIDbContext _context;
 
@@ -44,7 +42,7 @@ public class InvoicesService : IInvoicesService
             throw new NotFoundException($"Invoice History Entity Record not found for {id}");
         }
 
-        var LineItemEntitys = _context.LineItemEntitys.AsEnumerable().Where(x => x.InvoiceId == invoice.Id);
+        var LineItemEntitys = (await _context.LineItemEntitys.ToListAsync()).Where(x => x.InvoiceId == invoice.Id);
         var invoiceHistory = new InvoiceHistory
         {
             Id = invoice.Id,
@@ -53,34 +51,36 @@ public class InvoicesService : IInvoicesService
             TotalNumberLineItems = LineItemEntitys.Count(),
             TotalValue = LineItemEntitys.Count() > 0 ? LineItemEntitys.Sum(x => x.Cost) : 0,
             Discount = invoice.Discount,
-            LogMessages = _context.InvoicesHistory.AsEnumerable().Where(iHistory => iHistory.InvoiceId == id).Select(i => i.LogMessage)
+            LogMessages = _context.InvoicesHistory.AsEnumerable().Where(iHistory => iHistory.InvoiceId == id).Select(i => new InvoiceHistoryMessage { Message = i.LogMessage, CreatedOn = i.CreatedOn })
         };
 
         return invoiceHistory;
     }
 
-    public LineItemModel GetInvoiceLineItems(int id)
+    public async Task<LineItemModel> GetInvoiceLineItemsAsync(int id)
     {
-        var billableInvoices = _context.LineItemEntitys.AsEnumerable().Where(x => x.InvoiceId == id && x.isBillable)
-              .GroupBy(r => r.InvoiceId)
-              .Select(a => new
-              {
-                  TotalBillableValue = a.Sum(r => r.Cost)
-              }).FirstOrDefault();
+        var billableInvoices = (await _context.LineItemEntitys.ToListAsync())
+            .Where(x => x.InvoiceId == id && x.isBillable)
+            .GroupBy(r => r.InvoiceId)
+            .Select(a => new
+            {
+                TotalBillableValue = a.Sum(r => r.Cost)
+            }).FirstOrDefault();
 
-        var totalInvoices = _context.LineItemEntitys.AsEnumerable().Where(x => x.InvoiceId == id)
-              .GroupBy(r => r.InvoiceId)
-              .Select(a => new
-              {
-                  GrandTotal = a.Sum(r => r.Cost)
-              }).FirstOrDefault();
+        var totalInvoices = (await _context.LineItemEntitys.ToListAsync())
+            .Where(x => x.InvoiceId == id)
+            .GroupBy(r => r.InvoiceId)
+            .Select(a => new
+            {
+                GrandTotal = a.Sum(r => r.Cost)
+            }).FirstOrDefault();
 
-        if (totalInvoices is null) throw new NotFoundException($"Invoices entity record with id: {id} not found");
-
+        var discount = (await _context.Invoices.FindAsync(id)).Discount;
         LineItemModel LineItemEntityModel = new LineItemModel
         {
-            LineItem = _context.LineItemEntitys.Where(x => x.InvoiceId == id).ToList(),
+            LineItem = await _context.LineItemEntitys.Where(x => x.InvoiceId == id).ToListAsync(),
             GrandTotal = totalInvoices == null ? 0 : totalInvoices.GrandTotal,
+            Discount = discount,
             TotalBillableValue = billableInvoices == null ? 0 : billableInvoices.TotalBillableValue
         };
 
@@ -148,9 +148,6 @@ public class InvoicesService : IInvoicesService
             await UpdateLineItemEntityAsync(LineItemEntity);
         }
 
-        await _context.AddAsync(LineItemEntity);
-        await _context.SaveChangesAsync();
-
         return LineItemEntity;
     }
 
@@ -207,16 +204,13 @@ public class InvoicesService : IInvoicesService
     private async Task<bool> AddLineItemEntityAsync(LineItemEntity lineItemEntity)
     {
         bool done = false;
-        await Task.Run(async () =>
-        {
-            await _context.LineItemEntitys.AddAsync(lineItemEntity);
+        await _context.LineItemEntitys.AddAsync(lineItemEntity);
 
-            if ((await _context.SaveChangesAsync()) == 1)
-            {
-                done = true;
-                await AddInvoiceHistoryAsync(lineItemEntity.InvoiceId, $"{lineItemEntity.Description} has been added in the invoice");
-            }
-        });
+        if ((await _context.SaveChangesAsync()) == 1)
+        {
+            done = true;
+            await AddInvoiceHistoryAsync(lineItemEntity.InvoiceId, $"{lineItemEntity.Description} has been added in the invoice");
+        }
         return done;
     }
 

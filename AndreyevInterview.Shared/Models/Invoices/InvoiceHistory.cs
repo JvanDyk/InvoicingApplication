@@ -2,5 +2,11 @@
 
 public class InvoiceHistory : Invoices
 {
-    public IEnumerable<string> LogMessages { get; set; }
+    public IEnumerable<InvoiceHistoryMessage> LogMessages { get; set; }
+}
+
+public class InvoiceHistoryMessage 
+{ 
+    public string Message { get; set; }
+    public DateTime CreatedOn { get; set; }
 }

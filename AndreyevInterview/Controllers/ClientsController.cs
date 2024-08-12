@@ -23,6 +23,17 @@ public class ClientsController : ControllerBase
     }
 
     /// <summary>
+    /// Retrieves a client.
+    /// </summary>
+    /// <returns>Returns a client.</returns>
+    [HttpGet("{id}")]
+    public async Task<ActionResult<List<ClientEntity>>> GetClient([FromRoute]int id)
+    {
+        var client = await _clientService.GetClientAsync(id);
+        return Ok(client);
+    }
+
+    /// <summary>
     /// Creates a new client.
     /// </summary>
     /// <param name="clientEntity">Information about the client to create.</param>
